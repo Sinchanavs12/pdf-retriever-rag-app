@@ -1,6 +1,6 @@
 
-from .pdf_processor import extract_pdf_text
-from .chunker import chunk_pages
+from app.pdf_processor import extract_pdf_text
+from app.chunker import chunk_pages
 
 # PDF path
 file_path = "uploads/CNS-module-1.pdf"

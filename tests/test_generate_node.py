@@ -1,5 +1,5 @@
 
-from .nodes import retrieve_node, generate_node
+from app.nodes import retrieve_node, generate_node
 
 # Initial state
 state = {

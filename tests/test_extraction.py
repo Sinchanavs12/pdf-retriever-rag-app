@@ -1,5 +1,5 @@
 
-from .pdf_processor import extract_pdf_text
+from app.pdf_processor import extract_pdf_text
 
 # Path of our uploaded PDF
 file_path = "uploads/CNS-module-1.pdf"

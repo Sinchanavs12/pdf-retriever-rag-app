@@ -1,6 +1,6 @@
-from .pdf_processor import extract_pdf_text
-from .chunker import chunk_pages
-from .embeddings import generate_embeddings
+from app.pdf_processor import extract_pdf_text
+from app.chunker import chunk_pages
+from app.embeddings import generate_embeddings
 
 # Step 1: Extract PDF text
 file_path = "uploads/CNS-module-1.pdf"

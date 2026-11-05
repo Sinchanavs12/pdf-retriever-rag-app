@@ -1,5 +1,5 @@
 
-from .retriever import retrieve_chunks
+from app.retriever import retrieve_chunks
 
 question = "What is symmetric encryption?"
 

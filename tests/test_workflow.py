@@ -1,5 +1,5 @@
 
-from .workflow import run_workflow
+from app.workflow import run_workflow
 
 question = "What is symmetric encryption?"
 

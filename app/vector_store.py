@@ -1,9 +1,8 @@
-
 import chromadb
-import os
 
 
-def store_chunks(chunks, embeddings, collection_name="pdf_documents"):
+def store_chunks(chunks, embeddings, document_id, collection_name="pdf_documents"):
+
     # Create a persistent ChromaDB client
     client = chromadb.PersistentClient(path="chroma_db")
 
@@ -12,15 +11,22 @@ def store_chunks(chunks, embeddings, collection_name="pdf_documents"):
         name=collection_name
     )
 
-    # Prepare data for storage
+    # Generate unique IDs for every chunk
     ids = [
-        f"{chunk['metadata']['source']}_{chunk['chunk_id']}"
+        f"{document_id}_{chunk['chunk_id']}"
         for chunk in chunks
     ]
 
+    # Prepare documents
     documents = [chunk["text"] for chunk in chunks]
 
-    metadatas = [chunk["metadata"] for chunk in chunks]
+    # Add document_id to each chunk's metadata
+    metadatas = []
+
+    for chunk in chunks:
+        metadata = chunk["metadata"].copy()
+        metadata["document_id"] = document_id
+        metadatas.append(metadata)
 
     # Store chunks, embeddings, and metadata
     collection.upsert(
@@ -30,4 +36,5 @@ def store_chunks(chunks, embeddings, collection_name="pdf_documents"):
         metadatas=metadatas
     )
 
-    return collection.count()
+    # Return the number of chunks stored for this upload
+    return len(ids)

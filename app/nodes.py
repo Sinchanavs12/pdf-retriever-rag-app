@@ -1,46 +1,83 @@
 
-from .retriever import retrieve_chunks
+from .retriever import retrieve_multiple_questions
 from .generator import generate_answer
+import re
+
 
 def retrieve_node(state):
-    # Get the user's question
     question = state["question"]
 
-    # Retrieve relevant chunks from ChromaDB
-    results = retrieve_chunks(question, top_k=3)
+    # Split a combined question into individual questions
+    # Split combined questions using ?, . or !
+    questions = [
+        q.strip()
+        for q in re.split(r'(?<=[.!?])\s+', question)
+        if q.strip()
+    ]
 
-    # Combine retrieved documents into context
-    context = "\n\n".join(results["documents"][0])
+    # Retrieve relevant chunks separately for each question
+    results = retrieve_multiple_questions(
+        questions,
+        top_k=8
+    )
 
-    # Extract source information
+    documents = results["documents"]
+    metadatas = results["metadatas"]
+
+    # Prepare context with PDF filename and page number
+    context_parts = []
     sources = []
 
-    for metadata in results["metadatas"][0]:
+    for document, metadata in zip(documents, metadatas):
+
+        source_name = metadata.get("source", "Unknown PDF")
+        page_number = metadata.get("page_number", "Unknown")
+
+        context_parts.append(
+            f"Source PDF: {source_name}\n"
+            f"Page Number: {page_number}\n"
+            f"Content:\n{document}"
+        )
+
+        # Collect unique source details
         source = {
-            "source": metadata["source"],
-            "page_number": metadata["page_number"]
+            "source": source_name,
+            "page_number": page_number
         }
 
         if source not in sources:
             sources.append(source)
 
-    # Return updated state
+    # Combine all retrieved chunks into one context
+    context = "\n\n---\n\n".join(context_parts)
+
+    # Debug information
+    print(f"\nRetrieved unique chunks: {len(documents)}")
+
+    for index, (document, metadata) in enumerate(
+        zip(documents, metadatas),
+        start=1
+    ):
+        print(
+            f"\nChunk {index} | "
+            f"Source: {metadata.get('source', 'Unknown PDF')} | "
+            f"Page: {metadata.get('page_number', 'Unknown')}"
+        )
+        print(document[:200])
+
     return {
         "context": context,
         "sources": sources
     }
-def generate_node(state):
-    # Get the user's question
-    question = state["question"]
 
-    # Get the retrieved PDF context
+
+def generate_node(state):
+    question = state["question"]
     context = state["context"]
 
-    # Generate an answer using the LLM
+    # Generate an answer using the retrieved PDF context
     answer = generate_answer(question, context)
 
-    # Return the generated answer
     return {
         "answer": answer
     }
-

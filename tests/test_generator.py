@@ -1,6 +1,6 @@
 
-from .retriever import retrieve_chunks
-from .generator import generate_answer
+from app.retriever import retrieve_chunks
+from app.generator import generate_answer
 
 question = "What is symmetric encryption?"
 
