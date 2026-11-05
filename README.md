@@ -233,6 +233,65 @@ The following components have been tested:
 
 End-to-end testing was performed through Swagger UI.
 
+## Daily Development Progress
+
+### November 5, 2026 – Multi-PDF Support and Retrieval Improvements
+
+The following enhancements were implemented and tested:
+
+**1. Unique Document ID Generation**
+- Generated a unique UUID for every uploaded PDF.
+- Each document can be identified and tracked independently.
+- Added upload status tracking with three states:
+  - `processing`
+  - `completed`
+  - `failed`
+- Implemented a status-checking endpoint: `GET /upload/{document_id}/status`.
+
+**2. Multiple PDF Upload Support**
+- Updated the `/upload` endpoint to accept multiple PDF files in a single request.
+- Each PDF is processed independently.
+- Added PDF extension and file-signature validation.
+- Processing continues even if one of the uploaded files fails.
+- The API response provides the total number of files, successful uploads, failed uploads, and individual processing results.
+
+**3. Multiple-Question Handling**
+- Improved question processing to handle multiple questions submitted in a single request.
+- Implemented question splitting using sentence-ending punctuation.
+- Each question is retrieved separately before generating the response.
+
+**4. Multi-PDF Retrieval and Source References**
+- Updated document storage to associate chunks with their respective document IDs.
+- Improved retrieved context formatting to include source PDF filenames and page numbers.
+- Enabled retrieval across multiple uploaded PDFs stored in the shared ChromaDB collection.
+- Improved answer generation instructions to answer multiple questions separately using the relevant PDF context.
+
+**5. Testing and Validation**
+
+Uploaded and tested three PDF documents together:
+
+- `BCS714D_MODULE_1.pdf` – Big Data Analytics Module 1
+- `BCS714D_MODULE_2.pdf` – Big Data Analytics Module 2 (Hadoop)
+- `BCS714D_MODULE_3.pdf` – Big Data Analytics Module 3 (MongoDB)
+
+Testing included:
+- Uploading all three PDFs in a single API request.
+- Verifying unique document IDs and individual upload statuses.
+- Asking separate questions about each PDF.
+- Asking multiple questions in a single request.
+- Verifying that relevant information was retrieved from the correct PDF.
+- Checking whether generated answers included source filenames and page references.
+
+**Testing Result:** All three PDFs were uploaded successfully. Individual and combined question-answering tests returned relevant responses with source references.
+
+**6. GitHub Update**
+- Committed and pushed the latest changes to the `main` branch.
+- Commit: `Add multi-PDF upload and improve RAG retrieval`
+
+**Pending Enhancement:**
+- Implement progressive LLM response streaming so that answers are displayed incrementally instead of waiting for the complete response.
+
+
 ## Current Scope and Limitations
 
 - The current implementation retrieves the top three matching chunks for a question.
