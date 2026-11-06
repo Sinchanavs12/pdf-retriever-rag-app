@@ -288,8 +288,39 @@ Testing included:
 - Committed and pushed the latest changes to the `main` branch.
 - Commit: `Add multi-PDF upload and improve RAG retrieval`
 
-**Pending Enhancement:**
-- Implement progressive LLM response streaming so that answers are displayed incrementally instead of waiting for the complete response.
+**Completed on November 6, 2026:**
+- Implemented and tested progressive LLM response streaming.
+
+### November 6, 2026 – LLM Response Streaming
+
+Implemented and tested progressive LLM response streaming as the remaining enhancement suggested during the project review.
+
+**1. Streaming Response Implementation**
+- Added a new API endpoint: `POST /ask/stream`.
+- Integrated the `stream_answer()` function to generate LLM responses incrementally.
+- Used FastAPI's `StreamingResponse` to send response chunks progressively.
+- Implemented newline-delimited JSON (NDJSON) to structure streaming events.
+- Sent source document information before streaming the answer.
+
+**2. Streaming Event Structure**
+
+The streaming endpoint returns three types of events:
+
+- `sources` – Provides the retrieved source filenames and page numbers.
+- `content` – Sends answer text incrementally as chunks.
+- `done` – Indicates that response generation has completed.
+- `error` – Reports an error if streaming fails.
+
+**3. Testing and Validation**
+
+- Created a separate test script: `tests/test_stream.py`.
+- Tested the streaming endpoint using Python's `requests` library.
+- Verified the HTTP response status code (`200 OK`).
+- Confirmed that source information arrives before the answer.
+- Observed answer chunks arriving progressively with timestamps.
+- Verified that the final `done` event is received.
+
+**Testing Result:** Streaming was successfully tested. The response was delivered incrementally rather than waiting for the complete LLM-generated answer.
 
 
 ## Current Scope and Limitations

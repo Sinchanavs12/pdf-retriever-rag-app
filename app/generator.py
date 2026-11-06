@@ -1,7 +1,6 @@
 
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv
-import os
 
 load_dotenv()
 
@@ -13,7 +12,8 @@ llm = ChatGroq(
 )
 
 
-def generate_answer(question, context):
+# Common prompt generation
+def create_prompt(question, context):
 
     prompt = f"""
 You are an accurate PDF question-answering assistant.
@@ -61,6 +61,25 @@ ANSWER:
 Answer each question separately using numbered sections.
 """
 
+    return prompt
+
+
+# Existing non-streaming answer generation
+def generate_answer(question, context):
+
+    prompt = create_prompt(question, context)
+
     response = llm.invoke(prompt)
 
     return response.content
+
+
+# New streaming answer generation
+def stream_answer(question, context):
+
+    prompt = create_prompt(question, context)
+
+    for chunk in llm.stream(prompt):
+
+        if chunk.content:
+            yield chunk.content

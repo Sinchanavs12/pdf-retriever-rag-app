@@ -11,6 +11,9 @@ from .vector_store import store_chunks
 from .workflow import run_workflow
 from typing import Annotated
 from fastapi.openapi.utils import get_openapi
+from fastapi.responses import StreamingResponse
+from .generator import stream_answer
+import json
 
 
 # Create FastAPI application
@@ -246,5 +249,67 @@ def custom_openapi():
     return app.openapi_schema
 
 
+
+# Streaming Question and Answer endpoint
+@app.post("/ask/stream")
+def ask_question_stream(request: QuestionRequest):
+
+    if not request.question.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Question cannot be empty"
+        )
+
+    try:
+        # Execute retrieval workflow
+        result = run_workflow(request.question)
+
+        context = result["context"]
+        sources = result["sources"]
+
+        # Stream LLM response progressively
+        def generate():
+
+            try:
+                # Send source information first
+                yield json.dumps({
+                    "type": "sources",
+                    "sources": sources
+                }) + "\n"
+
+                # Stream answer chunks
+                for chunk in stream_answer(
+                    request.question,
+                    context
+                ):
+
+                    yield json.dumps({
+                        "type": "content",
+                        "content": chunk
+                    }) + "\n"
+
+                # Indicate completion
+                yield json.dumps({
+                    "type": "done"
+                }) + "\n"
+
+            except Exception as e:
+
+                yield json.dumps({
+                    "type": "error",
+                    "message": str(e)
+                }) + "\n"
+
+        return StreamingResponse(
+            generate(),
+            media_type="application/x-ndjson"
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Question processing failed: {str(e)}"
+        )
 app.openapi = custom_openapi
+
 
